@@ -1,7 +1,7 @@
 import random
 class Cipher(object):
 	def __init__(self,bits=16):
-		self.bits=16
+		self.bits=bits
 		self.init_sbox()
 	def init_sbox(self):
 		halfsz=2**(self.bits/2)
@@ -28,5 +28,5 @@ class Cipher(object):
 			result+=x
 		result/=(n*1.0)
 		print result
-ciph=Cipher()
+ciph=Cipher(bits=20)
 ciph.test()
