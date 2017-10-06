@@ -17,4 +17,14 @@ class Cipher(object):
 		return self.sbt[n]
 	def isbox(self,n):
 		return self.isbt[n]
+	def test(self):
+		result=0.0
+		n=len(self.sbt)
+		for i in range(1,n):
+			assert(self.isbt[self.sbt[i]]==i)
+			differingBits=self.sbt[i]^self.sbt[i-1]
+			x=bin(differingBits).count('1')
+			result+=x
+		result/=(n*1.0)
+		print result
 ciph=Cipher()
