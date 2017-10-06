@@ -20,6 +20,7 @@ class Cipher(object):
 	def test(self):
 		result=0.0
 		n=len(self.sbt)
+		assert(self.isbt[self.sbt[0]]==0)
 		for i in range(1,n):
 			assert(self.isbt[self.sbt[i]]==i)
 			differingBits=self.sbt[i]^self.sbt[i-1]
@@ -28,3 +29,4 @@ class Cipher(object):
 		result/=(n*1.0)
 		print result
 ciph=Cipher()
+ciph.test()
