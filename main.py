@@ -13,11 +13,25 @@ class Cipher(object):
 			y=tab[x]
 			self.sbt[x]=y
 			self.isbt[y]=x
-	def sbox(self,n):
-		return self.sbt[n]
-	def isbox(self,n):
-		return self.isbt[n]
+	def sbox(self,x):
+		return self.sbt[x]
+	def isbox(self,x):
+		return self.isbt[x]
+	def shl(self,x,r,n):
+		r=r%n
+		umask=((2**r)-1)<<(n-r)
+		lmask=((2**(n-r))-1)
+		upper=(x&umask)>>(n-r)
+		lower=x&lmask
+#		print('upper %x,lower %x'%(upper,lower))
+		return upper+(lower<<r)
+	def shr(self,x,r,n):
+		r=r%n
+		lmask=((2**(r))-1)
+		lower=x&lmask
+		return (x>>r)+(lower<<(n-r))
 	def test(self):
+		self.testShifts()
 		result=0.0
 		n=len(self.sbt)
 		assert(self.isbt[self.sbt[0]]==0)
@@ -28,5 +42,12 @@ class Cipher(object):
 			result+=x
 		result/=(n*1.0)
 		print result
-ciph=Cipher(bits=20)
+	def testShifts(self):
+		x=0xff
+		for i in range(65):
+			a=self.shr(x,i,32)
+			b=self.shl(x,i,32)
+			print '%x %x'%(a,b)
+			assert(self.shl(self.shr(x,i,32),i,32)==x)
+ciph=Cipher(bits=16)
 ciph.test()
