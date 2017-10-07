@@ -23,13 +23,17 @@ class Sbox(object):
 		result/=(n*1.0)
 		print result
 class Cipher(object):
-	def __init__(self,bits=16):
+	def __init__(self,bits=256):
 		self.bits=bits
-		self.sbc=Sbox(bits=bits)
-	def sbox(self,x):
-		return self.sbc.sbt[x]
-	def isbox(self,x):
-		return self.sbc.isbt[x]
+		sboxSz=16
+		self.nSbox=bits/sboxSz
+		self.sbc=[]
+		for i in range(self.nSbox):
+			self.sbc.append(Sbox(bits=sboxSz))
+	def sbox(self,x,i):
+		return self.sbc[i].sbt[x]
+	def isbox(self,x,i):
+		return self.sbc[i].isbt[x]
 	def p1(self,x):	#shiftrows
 		linelen=int(self.bits**0.5)
 		lines=self.getLines(x)
@@ -81,7 +85,9 @@ class Cipher(object):
 		self.testShifts()
 		self.testSbox()
 	def testSbox(self):
-		self.sbc.test()
+		for i in range(self.nSbox):
+			print i
+			self.sbc[i].test()
 	def testShifts(self):
 		x=0xff
 		for i in range(65):
@@ -89,7 +95,7 @@ class Cipher(object):
 			b=self.shl(x,i,32)
 			print '%x %x'%(a,b)
 			assert(self.shl(self.shr(x,i,32),i,32)==x)
-ciph=Cipher(bits=16)
+ciph=Cipher()
 ciph.test()
 x=ciph.p1(1234)
 print x
