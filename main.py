@@ -1,9 +1,7 @@
 import random
-class Cipher(object):
+class Sbox(object):
 	def __init__(self,bits=16):
 		self.bits=bits
-		self.init_sbox()
-	def init_sbox(self):
 		halfsz=2**(self.bits/2)
 		fullsz=2**self.bits
 		self.sbt=[1]*fullsz
@@ -13,10 +11,25 @@ class Cipher(object):
 			y=tab[x]
 			self.sbt[x]=y
 			self.isbt[y]=x
+	def test(self):
+		result=0.0
+		n=len(self.sbt)
+		assert(self.isbt[self.sbt[0]]==0)
+		for i in range(1,n):
+			assert(self.isbt[self.sbt[i]]==i)
+			differingBits=self.sbt[i]^self.sbt[i-1]
+			x=bin(differingBits).count('1')
+			result+=x
+		result/=(n*1.0)
+		print result
+class Cipher(object):
+	def __init__(self,bits=16):
+		self.bits=bits
+		self.sbc=Sbox(bits=bits)
 	def sbox(self,x):
-		return self.sbt[x]
+		return self.sbc.sbt[x]
 	def isbox(self,x):
-		return self.isbt[x]
+		return self.sbc.isbt[x]
 	def p1(self,x):	#shiftrows
 		linelen=int(self.bits**0.5)
 		lines=self.getLines(x)
@@ -66,16 +79,9 @@ class Cipher(object):
 		return (x>>r)+(lower<<(n-r))
 	def test(self):
 		self.testShifts()
-		result=0.0
-		n=len(self.sbt)
-		assert(self.isbt[self.sbt[0]]==0)
-		for i in range(1,n):
-			assert(self.isbt[self.sbt[i]]==i)
-			differingBits=self.sbt[i]^self.sbt[i-1]
-			x=bin(differingBits).count('1')
-			result+=x
-		result/=(n*1.0)
-		print result
+		self.testSbox()
+	def testSbox(self):
+		self.sbc.test()
 	def testShifts(self):
 		x=0xff
 		for i in range(65):
