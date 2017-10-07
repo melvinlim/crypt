@@ -37,7 +37,12 @@ class Cipher(object):
 			out.append(self.isbox(inp[i],i))
 		result=self.getNumber(out,self.sboxSz)
 		return result
+	def keyGen(self,k,kSz,n):
+		return self.split(k,kSz,n)
 	def enc(self,x,key):
+		self.keySz=self.sboxSz
+		self.nKeys=4
+		self.keys=self.keyGen(key,self.keySz,self.nKeys)
 		inp=self.getLines(x,self.sboxSz)
 		out=[]
 		for i in range(self.nSbox):
@@ -65,6 +70,14 @@ class Cipher(object):
 			tmp=self.shl(lines[i],i,linelen)
 			l.append(tmp)
 		return self.getNumber(l,linelen)
+	def split(self,x,sz,n):
+		lines=[]
+		mask=((2**sz)-1)
+		for i in range(n):
+			a=(x&mask)>>(i*sz)
+			lines.append(a)
+			mask=mask<<(sz)
+		return lines
 	def getLines(self,x,n):
 		linelen=n
 		lines=[]
@@ -114,7 +127,8 @@ x=ciph.p1(1234)
 print x
 print ciph.ip1(x)
 tx=1234892
+key=2314
 print tx
-ct=ciph.enc(tx,2314)
-tx=ciph.dec(ct,2314)
+ct=ciph.enc(tx,key)
+tx=ciph.dec(ct,key)
 print tx
