@@ -25,34 +25,48 @@ class Sbox(object):
 class Cipher(object):
 	def __init__(self,bits=256):
 		self.bits=bits
-		sboxSz=16
-		self.nSbox=bits/sboxSz
+		self.sboxSz=16
+		self.nSbox=bits/self.sboxSz
 		self.sbc=[]
 		for i in range(self.nSbox):
-			self.sbc.append(Sbox(bits=sboxSz))
+			self.sbc.append(Sbox(bits=self.sboxSz))
+	def dec(self,x,key):
+		inp=self.getLines(x,self.sboxSz)
+		out=[]
+		for i in range(self.nSbox):
+			out.append(self.isbox(inp[i],i))
+		result=self.getNumber(out,self.sboxSz)
+		return result
+	def enc(self,x,key):
+		inp=self.getLines(x,self.sboxSz)
+		out=[]
+		for i in range(self.nSbox):
+			out.append(self.sbox(inp[i],i))
+		result=self.getNumber(out,self.sboxSz)
+		return result
 	def sbox(self,x,i):
 		return self.sbc[i].sbt[x]
 	def isbox(self,x,i):
 		return self.sbc[i].isbt[x]
 	def p1(self,x):	#shiftrows
 		linelen=int(self.bits**0.5)
-		lines=self.getLines(x)
-		assert(self.getNumber(lines)==x)
+		lines=self.getLines(x,linelen)
+		assert(self.getNumber(lines,linelen)==x)
 		l=[]
 		for i in range(len(lines)):
 			tmp=self.shr(lines[i],i,linelen)
 			l.append(tmp)
-		return self.getNumber(l)
+		return self.getNumber(l,linelen)
 	def ip1(self,x):
 		linelen=int(self.bits**0.5)
-		lines=self.getLines(x)
+		lines=self.getLines(x,linelen)
 		l=[]
 		for i in range(len(lines)):
 			tmp=self.shl(lines[i],i,linelen)
 			l.append(tmp)
-		return self.getNumber(l)
-	def getLines(self,x):
-		linelen=int(self.bits**0.5)
+		return self.getNumber(l,linelen)
+	def getLines(self,x,n):
+		linelen=n
 		lines=[]
 		mask=((2**linelen)-1)
 		for i in range(linelen):
@@ -60,8 +74,7 @@ class Cipher(object):
 			lines.append(a)
 			mask=mask<<(linelen)
 		return lines
-	def getNumber(self,lines):
-		linelen=int(self.bits**0.5)
+	def getNumber(self,lines,linelen):
 		x=0
 		for i in range(linelen):
 			x+=lines[i]<<(i*linelen)
@@ -100,3 +113,8 @@ ciph.test()
 x=ciph.p1(1234)
 print x
 print ciph.ip1(x)
+tx=1234892
+print tx
+ct=ciph.enc(tx,2314)
+tx=ciph.dec(ct,2314)
+print tx
