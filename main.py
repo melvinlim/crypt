@@ -17,6 +17,40 @@ class Cipher(object):
 		return self.sbt[x]
 	def isbox(self,x):
 		return self.isbt[x]
+	def p1(self,x):	#shiftrows
+		linelen=int(self.bits**0.5)
+		lines=self.getLines(x)
+		assert(self.getNumber(lines)==x)
+		l=[]
+		for i in range(len(lines)):
+			tmp=self.shr(lines[i],i,linelen)
+			l.append(tmp)
+		return self.getNumber(l)
+	def ip1(self,x):
+		linelen=int(self.bits**0.5)
+		lines=self.getLines(x)
+		l=[]
+		for i in range(len(lines)):
+			tmp=self.shl(lines[i],i,linelen)
+			l.append(tmp)
+		return self.getNumber(l)
+	def getLines(self,x):
+		linelen=int(self.bits**0.5)
+		lines=[]
+		mask=((2**linelen)-1)
+		for i in range(linelen):
+			a=(x&mask)>>(i*linelen)
+			lines.append(a)
+			mask=mask<<(linelen)
+		return lines
+	def getNumber(self,lines):
+		linelen=int(self.bits**0.5)
+		x=0
+		for i in range(linelen):
+			x+=lines[i]<<(i*linelen)
+		return x
+	def pbox(self,x):
+		return 0
 	def shl(self,x,r,n):
 		r=r%n
 		umask=((2**r)-1)<<(n-r)
@@ -51,3 +85,6 @@ class Cipher(object):
 			assert(self.shl(self.shr(x,i,32),i,32)==x)
 ciph=Cipher(bits=16)
 ciph.test()
+x=ciph.p1(1234)
+print x
+print ciph.ip1(x)
