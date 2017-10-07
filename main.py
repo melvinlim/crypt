@@ -27,35 +27,43 @@ class Cipher(object):
 		self.bits=bits
 		self.sboxSz=16
 		self.nSbox=bits/self.sboxSz
+		self.keySz=self.sboxSz
+		self.nKeys=4
 		self.sbc=[]
 		for i in range(self.nSbox):
 			self.sbc.append(Sbox(bits=self.sboxSz))
-	def dec(self,x,key):
-		linelen=int(self.bits**0.5)
-		x=self.ip1(x,linelen)
+	def isboxes(self,x):
 		inp=self.getLines(x,self.sboxSz)
 		out=[]
 		for i in range(self.nSbox):
 			out.append(self.isbox(inp[i],i))
 		x=self.getNumber(out,self.sboxSz)
-		result=x^self.keys[0]
-		return result
-	def keyGen(self,k,kSz,n):
-		return self.split(k,kSz,n)
-	def enc(self,x,key):
-		self.keySz=self.sboxSz
-		self.nKeys=4
-		self.keys=self.keyGen(key,self.keySz,self.nKeys)
-		print self.keys
-		x=x^self.keys[0]
+		return x
+	def sboxes(self,x):
 		inp=self.getLines(x,self.sboxSz)
 		out=[]
 		for i in range(self.nSbox):
 			out.append(self.sbox(inp[i],i))
-		result=self.getNumber(out,self.sboxSz)
+		x=self.getNumber(out,self.sboxSz)
+		return x
+	def dec(self,x,key):
 		linelen=int(self.bits**0.5)
-		result=self.p1(result,linelen)
-		return result
+		keys=self.keyGen(key,self.keySz,self.nKeys)
+		x=x^keys[1]
+		x=self.ip1(x,linelen)
+		x=self.isboxes(x)
+		x=x^keys[0]
+		return x
+	def keyGen(self,k,kSz,n):
+		return self.split(k,kSz,n)
+	def enc(self,x,key):
+		linelen=int(self.bits**0.5)
+		keys=self.keyGen(key,self.keySz,self.nKeys)
+		x=x^keys[0]
+		x=self.sboxes(x)
+		x=self.p1(x,linelen)
+		x=x^keys[1]
+		return x
 	def sbox(self,x,i):
 		return self.sbc[i].sbt[x]
 	def isbox(self,x,i):
